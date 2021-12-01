@@ -1,21 +1,27 @@
 #include "get_next_line.h"
 
-char	*line_next_end(char *line_next, char **line)
+char	*line_next_end(char **line_next, char **line)
 {
 	char	*pointer_n;
+	char	*clean;
 
 	pointer_n = NULL;
-	if (line_next)
+	if (*line_next)
 	{
-		pointer_n = ft_strchr(line_next, '\n');
+		pointer_n = ft_strchr(*line_next, '\n');
 		if (pointer_n)
 		{
+			clean = *line_next;
+			*line = ft_strdup(*line_next);
 			*pointer_n = '\0';
-			*line = ft_strdup(line_next);
-			line_next = ft_strdup(++pointer_n);
+			free(clean);
+			*line_next = ft_strdup(++pointer_n);
 		}
 		else
-			*line = line_next;
+		{
+			*line = *line_next;
+			*line_next = NULL;
+		}
 	}
 	else
 		*line = ft_strdup("");
@@ -27,18 +33,27 @@ char	*get_next_line(int fd)
 	char		buff[BUFFER_SIZE + 1];
 	char		*line;
 	char		*pointer_n;
-	static char	*line_next[12500];
+	static char	*line_next;
 	char		*clean;
+	int		bf;
 
-	pointer_n = line_next_end(*line_next, &line);
+	if (BUFFER_SIZE <= 0 || fd < 0)
+		return(NULL);
+	bf = read(fd, buff, BUFFER_SIZE);
+	pointer_n = line_next_end(&line_next, &line);
 	while (!pointer_n)
 	{
-		buff[read(fd, buff, BUFFER_SIZE)] = '\0';
+		if (bf <= 0  && *line == '\0')
+		{
+			free(line);
+			return (NULL);
+		}
+		buff[bf] = '\0';
 		pointer_n = ft_strchr(buff, '\n');
 		if (pointer_n)
 		{
+			line_next = ft_strdup(++pointer_n);
 			*pointer_n = '\0';
-			*line_next = ft_strdup(++pointer_n);
 		}
 		clean = line;
 		line = ft_strjoin(line, buff);
@@ -53,6 +68,6 @@ int main (void)
 	int	fd;
 	fd = open("text.txt", O_RDONLY);
 	printf("%s\n", get_next_line(fd));
-	printf("%s\n", get_next_line(fd));
-	printf("%s", get_next_line(fd));
+	/*printf("%s\n", get_next_line(fd));
+	printf("%s", get_next_line(fd));*/
 }
