@@ -13,9 +13,9 @@ char	*line_next_end(char **line_next, char **line)
 		{
 			clean = *line_next;
 			*line = ft_strdup(*line_next);
-			*pointer_n = '\0';
-			free(clean);
 			*line_next = ft_strdup(++pointer_n);
+			free(clean);
+			*pointer_n = '\0';
 		}
 		else
 		{
@@ -39,10 +39,11 @@ char	*get_next_line(int fd)
 
 	if (BUFFER_SIZE <= 0 || fd < 0)
 		return(NULL);
-	bf = read(fd, buff, BUFFER_SIZE);
+	bf = 1;
 	pointer_n = line_next_end(&line_next, &line);
-	while (!pointer_n)
-	{
+	while (!pointer_n && bf && !line_next)
+	{	
+		bf = read(fd, buff, BUFFER_SIZE);
 		if (bf <= 0  && *line == '\0')
 		{
 			free(line);
@@ -63,11 +64,11 @@ char	*get_next_line(int fd)
 	return (line);
 }
 
-int main (void)
+/*int main (void)
 {
 	int	fd;
 	fd = open("text.txt", O_RDONLY);
-	printf("%s\n", get_next_line(fd));
-	/*printf("%s\n", get_next_line(fd));
-	printf("%s", get_next_line(fd));*/
-}
+	printf("%s", get_next_line(fd));
+	printf("%s", get_next_line(fd));
+	printf("%s", get_next_line(fd));
+}*/
